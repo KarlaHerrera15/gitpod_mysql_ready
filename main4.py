@@ -24,8 +24,8 @@ import mysql.connector
 # Stabilire la connessione con MySQL e selezionare il database 'mydatabase'
 mydb = mysql.connector.connect(
   host="localhost",        # Server del database
-  user="yourusername",     # Nome utente MySQL
-  password="yourpassword", # Password MySQL
+  user="pythonuser",     # Nome utente MySQL
+  password="password123", # Password MySQL
   database="mydatabase"    # Database a cui ci si connette
 )
 

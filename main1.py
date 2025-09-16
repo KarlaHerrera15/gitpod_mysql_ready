@@ -16,8 +16,8 @@ import mysql.connector
 # Stabilire la connessione con MySQL
 mydb = mysql.connector.connect(
   host="localhost",
-  user="yourusername",    # Sostituire con il nome utente MySQL
-  password="yourpassword" # Sostituire con la password MySQL
+  user="pythonuser",    # Sostituire con il nome utente MySQL
+  password="password123" # Sostituire con la password MySQL
 )
 
 # Creare un cursore per eseguire le query
