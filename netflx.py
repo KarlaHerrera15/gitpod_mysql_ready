@@ -9,68 +9,64 @@ mydb = mysql.connector.connect(
 )
 mycursor = mydb.cursor()
 
-# Creazione del database NETFLIX_DB
+# Creazione del database NETFLIX_DB se non esiste
 mycursor.execute("CREATE DATABASE IF NOT EXISTS NETFLIX_DB")
 
-# Usa il database NETFLIX_DB
+# Seleziona il database
 mycursor.execute("USE NETFLIX_DB")
 
-# Creazione della tabella Netflix_Shows
+# Creazione della tabella Netflix_Shows con colonne corrette
 mycursor.execute("""
-    CREATE TABLE IF NOT EXISTS Netflix_Shows (
-        show_id VARCHAR(20) PRIMARY KEY,
-        type VARCHAR(20),
-        title VARCHAR(255),
-        director VARCHAR(255),
-        cast TEXT,
-        country VARCHAR(255),
-        date_added VARCHAR(50),
-        release_year INTEGER,
-        rating VARCHAR(20),
-        duration VARCHAR(50),
-        listed_in VARCHAR(255),
-        description TEXT
-    );
+CREATE TABLE IF NOT EXISTS Netflix_Shows (
+    show_id VARCHAR(20) PRIMARY KEY,
+    category VARCHAR(50),
+    title VARCHAR(255),
+    director VARCHAR(255),
+    cast TEXT,
+    country VARCHAR(255),
+    release_date VARCHAR(50),
+    rating VARCHAR(20),
+    duration VARCHAR(50),
+    type VARCHAR(100),
+    description TEXT
+);
 """)
 
-# Cancella dati dalla tabella (se presenti)
-mycursor.execute("DELETE FROM Netflix_Shows")
-mydb.commit()
-
-# Lettura dati da CSV
+# Lettura dati dal CSV
 netflix_data = pd.read_csv('./netflix_titles.csv')
-netflix_data = netflix_data.fillna('Null')  # Riempie i valori NaN con 'Null'
-print(netflix_data.head(10))
+netflix_data = netflix_data.fillna('Null')  # Rimpiazza valori NaN con 'Null'
 
-# Inserimento dati nella tabella
+# Inserimento dati
+cursor = mydb.cursor()
 for i, row in netflix_data.iterrows():
-    cursor = mydb.cursor()
-    sql = """
-    INSERT INTO Netflix_Shows 
-    (show_id, type, title, director, cast, country, date_added, release_year, rating, duration, listed_in, description)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """
-    # Assicurati che l'ordine delle colonne di row corrisponda alla query
-    cursor.execute(sql, (
-        str(row['show_id']),
-        row['type'],
-        row['title'],
-        row['director'],
-        row['cast'],
-        row['country'],
-        row['date_added'],
-        int(row['release_year']),
-        row['rating'],
-        row['duration'],
-        row['listed_in'],
-        row['description']
-    ))
-    mydb.commit()
-    print(f"Record {row['show_id']} inserito")
+    try:
+        sql = """
+        INSERT INTO Netflix_Shows 
+        (show_id, category, title, director, cast, country, release_date, rating, duration, type, description)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(sql, (
+            str(row['Show_Id']),
+            row['Category'],
+            row['Title'],
+            row['Director'],
+            row['Cast'],
+            row['Country'],
+            row['Release_Date'],
+            row['Rating'],
+            row['Duration'],
+            row['Type'],
+            row['Description']
+        ))
+        print(f"Record {row['Show_Id']} inserito")
+    except mysql.connector.Error as err:
+        print(f"Errore inserimento record {row['Show_Id']}: {err}")
 
-# Controlla i dati inseriti
-mycursor.execute("SELECT * FROM Netflix_Shows LIMIT 20")
+mydb.commit()
+cursor.close()
+
+# Verifica dati inseriti
+mycursor.execute("SELECT * FROM Netflix_Shows LIMIT 10")
 myresult = mycursor.fetchall()
-
 for record in myresult:
     print(record)
